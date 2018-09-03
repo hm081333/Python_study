@@ -76,7 +76,7 @@ def print_thread():
             # 当前循环 线程 状态已经存在线程状态列表内，替换状态
             thread_state_list[index] = thread.isAlive()
             pass
-        finally:
+        except Exception:
             # 往线程列表追加新线程的状态
             thread_state_list.append(thread.isAlive())
             pass
@@ -95,7 +95,6 @@ def get_mac_address():
     global mac
     node = uuid.getnode()
     mac = uuid.UUID(int=node).hex[-12:].upper()
-    print(node)
     pass
 
 
@@ -108,8 +107,13 @@ def on_message(ws, message):
         print("### Connect successfully ###")
         pass
 
+    def ping():
+        print("### Receive Ping successfully ###")
+        pass
+
     def set_config():
         global config
+        # noinspection PyBroadException
         try:
             config = json.loads(message["data"])
             with open(config_path, 'w') as f:
@@ -119,8 +123,7 @@ def on_message(ws, message):
             ws.close()
             print("### Set Config successfully ###")
             pass
-        except Exception as e:
-            print(e)
+        except Exception:
             print("### Set Config failure ###")
             pass
         pass
@@ -130,12 +133,14 @@ def on_message(ws, message):
         pass
 
     # try except 判断返回是否json传
+    # noinspection PyBroadException
     try:
         # JSON串转字典
         message = json.loads(message)
         # 构造字典 等同switch case
         switcher = {
             "init": init,
+            "ping": ping,
             "send": send,
             "config": set_config,
         }
@@ -145,7 +150,7 @@ def on_message(ws, message):
         # 执行方法
         func()
         pass
-    finally:
+    except Exception:
         # 不是JSON串，直接打印
         print(message)
         pass
@@ -176,8 +181,10 @@ def on_close(ws):
 def on_open(ws):
     # 开启一个线程 调用run方法
     try:
-        # 新建一个线程，Daemon线程，运行run方法，ws以参数传入，线程名为send_thread
-        send_thread = threading.Thread(target=run, args=(ws,), name="send_thread", daemon=True)
+        # 新建一个线程，运行run方法，ws以参数传入，线程名为send_thread
+        send_thread = threading.Thread(target=run, args=(ws,), name="send_thread")
+        # 设为Daemon线程
+        send_thread.setDaemon(True)
         if debug:
             global thread_list
             print(thread_list)
