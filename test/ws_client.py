@@ -6,6 +6,7 @@ import sys
 import os
 import uuid
 import json
+import signal
 
 try:
     # 尝试引入WebSocket库
@@ -59,6 +60,8 @@ send_interval = 5
 mac = ""
 # 配置文件存放路径
 config_path = ""
+# 是否需要停止运行
+need_stop = False
 
 
 # 服务端识别的终端ID
@@ -87,6 +90,14 @@ def print_thread():
     print(thread_state_list)
     # 打印运行中线程数量
     print("Number of threads:", threading.activeCount())
+    pass
+
+
+# 注册一个进程信号监听事件
+def signal_handler(signal_id):
+    global need_stop
+    need_stop = True
+    print('You pressed Ctrl+C!')
     pass
 
 
@@ -172,8 +183,10 @@ def on_error(ws, error):
 def on_close(ws):
     print("### Connection Closed ###")
     ws.close()
-    # 重新打开WebSocket连接
-    ws_reopen()
+    if not need_stop:
+        # 重新打开WebSocket连接
+        ws_reopen()
+        pass
     pass
 
 
@@ -230,14 +243,19 @@ def run(*args):
             pass
         # 休眠5秒，不计算失败情况下，等于5秒发送一次
         time.sleep(send_interval)
-        try:
-            # 往服务端发送信息
-            ws.send(json_data)
-        except Exception as e:
-            # 打印发送失败消息
-            print(e)
-            # 退出死循环
-            break
+        if need_stop:
+            ws.close()
+            pass
+        else:
+            try:
+                # 往服务端发送信息
+                ws.send(json_data)
+            except Exception as e:
+                # 打印发送失败消息
+                print(e)
+                # 退出死循环
+                break
+            pass
         pass
     pass
     # 退出死循环，打印
@@ -435,6 +453,9 @@ if __name__ == "__main__":
 
     # 设备网卡MAC地址
     get_mac_address()
+    # 使用信号处理模块 停止运行
+    signal.signal(signal.SIGINT, signal_handler)
+    # signal.signal(signal.SIGTERM, signal_handler)
     # 尝试连接WebSocket
     ws_open()
     pass
