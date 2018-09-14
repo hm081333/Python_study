@@ -222,7 +222,6 @@ def sign():
     md5_obj.update(PRIVATE_KEY.encode("utf8"))
     md5_obj.update(SECURITY_KEY.encode("utf8"))
     return md5_obj.hexdigest()
-    pass
 
 
 # 线程运行方法
@@ -351,12 +350,10 @@ def config_init(need_get_config=True):
         if not os.access(config_path, os.F_OK):
             print("config file not exist")
             return
-            pass
         # 文件不可读
         if not os.access(config_path, os.R_OK):
             print("config file not readable")
             return
-            pass
         try:
             # 打开config.json文件并把json转为数组
             with open(config_path) as f:
