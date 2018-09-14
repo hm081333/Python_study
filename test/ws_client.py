@@ -94,7 +94,7 @@ def print_thread():
 
 
 # 注册一个进程信号监听事件
-def signal_handler(signal_id):
+def signal_handler(signal_id, frame):
     global need_stop
     need_stop = True
     print('You pressed Ctrl+C!')
