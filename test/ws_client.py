@@ -4,9 +4,9 @@ import threading
 import time
 import sys
 import os
-import uuid
 import json
 import signal
+from module.module import *
 
 try:
     # 尝试引入WebSocket库
@@ -56,8 +56,8 @@ debug = False
 reconnect_wait = 10
 # 发送心跳间隔
 send_interval = 5
-# mac地址
-mac = ""
+# 设备网卡MAC地址
+mac = GetMac(upper=True, colon=True).mac
 # 配置文件存放路径
 config_path = ""
 # 初始化日志写入 对象
@@ -100,14 +100,6 @@ def stop_signal_handler(signal_id, frame):
     need_stop = True
     # print('You pressed Ctrl+C!')
     print('Exiting...')
-    pass
-
-
-# 获取机器mac地址 全大写
-def get_mac_address():
-    global mac
-    node = uuid.getnode()
-    mac = uuid.UUID(int=node).hex[-12:].upper()
     pass
 
 
@@ -355,7 +347,7 @@ def config_init(need_get_config=True):
             return
         try:
             # 打开config.json文件并把json转为数组
-            with open(config_path) as f:
+            with open(config_path, 'r') as f:
                 # 用配置文件的配置信息替换全局定义的配置
                 global config
                 config = json.load(f)
@@ -454,8 +446,6 @@ if __name__ == "__main__":
     if len(sys.argv) >= 2:
         host = sys.argv[1]
 
-    # 设备网卡MAC地址
-    get_mac_address()
     # 使用信号处理模块 停止运行
     # 终端输入了中断字符ctrl+c
     signal.signal(signal.SIGINT, stop_signal_handler)
