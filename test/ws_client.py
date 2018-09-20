@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# encoding: utf-8
+# Encoding: UTF-8
 import threading
 import time
 import sys
@@ -46,7 +46,7 @@ except ImportError:
 config = {}
 # 默认请求地址
 host = "ws://192.168.1.135:7272/"
-# md5默认私钥
+# md5默认密钥
 SECURITY_KEY = "4329098asdkae"
 # 设备私钥
 PRIVATE_KEY = ""
@@ -60,12 +60,12 @@ send_interval = 5
 mac = ""
 # 配置文件存放路径
 config_path = ""
+# 初始化日志写入 对象
+log_obj = ''
+# 日志文件存放路径
+log_path = ""
 # 是否需要停止运行
 need_stop = False
-
-
-# 服务端识别的终端ID
-# client_id = ""
 
 
 def print_thread():
@@ -94,10 +94,12 @@ def print_thread():
 
 
 # 注册一个进程信号监听事件
-def signal_handler(signal_id, frame):
+def stop_signal_handler(signal_id, frame):
+    print("Signal code", signal_id)
     global need_stop
     need_stop = True
-    print('You pressed Ctrl+C!')
+    # print('You pressed Ctrl+C!')
+    print('Exiting...')
     pass
 
 
@@ -112,9 +114,6 @@ def get_mac_address():
 # 当服务端发来消息时触发
 def on_message(ws, message):
     def init():
-        # global client_id
-        # 把服务端返回的终端ID存在全局变量中
-        # client_id = message["client_id"]
         print("### Connect successfully ###")
         pass
 
@@ -266,7 +265,7 @@ def run(*args):
 
 # 打开WebSocket连接
 def ws_open():
-    # 打开追踪器
+    # 启用跟踪器 开启后会打印 所有 请求相关信息
     websocket.enableTrace(debug)
     # 新建WebSocket连接
     ws = websocket.WebSocketApp(
@@ -388,13 +387,13 @@ def config_init(need_get_config=True):
         def set_reconnect_wait():
             global reconnect_wait
             reconnect_wait = config["reconnectWait"]
-            print("### Set ReconnectWait successfully ###")
+            print("### Set Reconnect Wait successfully ###")
             pass
 
         def set_send_interval():
             global send_interval
             send_interval = config["sendInterval"]
-            print("### Set sendInterval successfully ###")
+            print("### Set Send Interval successfully ###")
             pass
 
         def set_security_key():
@@ -409,6 +408,12 @@ def config_init(need_get_config=True):
             print("### Set PRIVATE KEY successfully ###")
             pass
 
+        def set_log_path():
+            global log_path
+            log_path = config["logPath"]
+            print("### Set Log Path successfully ###")
+            pass
+
         # 构造字典 等同switch case
         switcher = {
             "debug": set_debug,
@@ -417,6 +422,7 @@ def config_init(need_get_config=True):
             "sendInterval": set_send_interval,
             "securityKey": set_security_key,
             "privateKey": set_private_key,
+            "logPath": set_log_path,
         }
         # 循环出key值并赋值
         for configKey in config:
@@ -433,17 +439,17 @@ def config_init(need_get_config=True):
     pass
 
 
+# 主线程开始
 if __name__ == "__main__":
     # 调取配置文件 设置配置参数
     config_init()
+
     if debug:
         # 把目前正在运行的线程赋值给线程列表
         thread_list = threading.enumerate()
         thread_state_list = []
         pass
 
-    # 启用跟踪 开启后会打印 所有 请求相关信息
-    # WebSocket.enableTrace(True)
     # 判断 是否存在第二参数
     if len(sys.argv) >= 2:
         host = sys.argv[1]
@@ -451,8 +457,10 @@ if __name__ == "__main__":
     # 设备网卡MAC地址
     get_mac_address()
     # 使用信号处理模块 停止运行
-    signal.signal(signal.SIGINT, signal_handler)
-    # signal.signal(signal.SIGTERM, signal_handler)
+    # 终端输入了中断字符ctrl+c
+    signal.signal(signal.SIGINT, stop_signal_handler)
+    # 有kill函数调用产生
+    signal.signal(signal.SIGTERM, stop_signal_handler)
     # 尝试连接WebSocket
     ws_open()
     pass
