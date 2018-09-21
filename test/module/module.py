@@ -59,7 +59,7 @@ class Json(object):
                 pass
             pass
         except Exception as e:
-            print("fail to open file")
+            print("fail to read file")
             print(e)
             pass
         pass
@@ -68,14 +68,14 @@ class Json(object):
         return self.json_module.dumps(obj)
         pass
 
-    def file_dump(self, obj, file_path):
+    def file_dump(self, file_path, obj):
         try:
             with open(file_path, 'w') as f:
                 self.json_module.dump(obj, f)
                 pass
             pass
         except Exception as e:
-            print("fail to open file")
+            print("fail to write file")
             print(e)
             pass
         pass

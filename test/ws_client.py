@@ -4,7 +4,6 @@ import threading
 import time
 import sys
 import os
-import json
 import signal
 from module.module import *
 
@@ -25,6 +24,8 @@ except ImportError:
         pass
     import websocket
 
+    pass
+
 try:
     # 尝试引入hashlib库 用于md5
     import hashlib
@@ -42,6 +43,10 @@ except ImportError:
         pass
     import hashlib
 
+    pass
+
+# 实例化json类
+json = Json()
 # 全局配置信息 默认空
 config = {}
 # 默认请求地址
@@ -117,10 +122,8 @@ def on_message(ws, message):
         global config
         # noinspection PyBroadException
         try:
-            config = json.loads(message["data"])
-            with open(config_path, 'w') as f:
-                json.dump(config, f)
-                pass
+            config = json.load(message["data"])
+            json.file_dump(config_path, config)
             config_init(False)
             ws.close()
             print("### Set Config successfully ###")
@@ -138,7 +141,7 @@ def on_message(ws, message):
     # noinspection PyBroadException
     try:
         # JSON串转字典
-        message = json.loads(message)
+        message = json.load(message)
         # 构造字典 等同switch case
         switcher = {
             "init": init,
@@ -225,7 +228,7 @@ def run(*args):
         'sign': sign()
     }
     # 列表转JSON
-    json_data = json.dumps(data)
+    json_data = json.dump(data)
     while True:
         if debug:
             # 打印线程信息
@@ -233,8 +236,11 @@ def run(*args):
             pass
         # 休眠5秒，不计算失败情况下，等于5秒发送一次
         time.sleep(send_interval)
+        # 将要关闭
         if need_stop:
-            ws.close()
+            print('Exiting......')
+            # 直接退出循环
+            break
             pass
         else:
             try:
@@ -345,19 +351,8 @@ def config_init(need_get_config=True):
         if not os.access(config_path, os.R_OK):
             print("config file not readable")
             return
-        try:
-            # 打开config.json文件并把json转为数组
-            with open(config_path, 'r') as f:
-                # 用配置文件的配置信息替换全局定义的配置
-                global config
-                config = json.load(f)
-                pass
-            pass
-        except Exception as e:
-            # 读取配置文件失败
-            print("fail to parse file")
-            print(e)
-            pass
+        global config
+        config = json.file_load(config_path)
         pass
 
     # 根据读取出的配置设置参数
