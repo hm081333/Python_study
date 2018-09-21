@@ -90,11 +90,14 @@ def print_thread():
             pass
         pass
     # 打印线程列表
-    print(thread_list)
+    websocket.dump("thread list", thread_list)
+    # print(thread_list)
     # 打印线程状态列表
-    print(thread_state_list)
+    websocket.dump("thread state list", thread_state_list)
+    # print(thread_state_list)
     # 打印运行中线程数量
-    print("Number of threads:", threading.activeCount())
+    websocket.dump("thread count", threading.activeCount())
+    # print("Number of threads:", threading.activeCount())
     pass
 
 
@@ -167,8 +170,10 @@ def on_error(ws, error):
     ws.close()
     print(error)
     if debug:
-        print(threading.enumerate())
-        print(threading.activeCount())
+        websocket.dump("threads", threading.enumerate())
+        websocket.dump("thread count", threading.activeCount())
+        # print(threading.enumerate())
+        # print(threading.activeCount())
         pass
     pass
 
@@ -194,7 +199,8 @@ def on_open(ws):
         send_thread.setDaemon(True)
         if debug:
             global thread_list
-            print(thread_list)
+            websocket.dump("thread list", thread_list)
+            # print(thread_list)
             # 新建线程追加到线程列表
             thread_list.append(send_thread)
             pass
@@ -293,9 +299,8 @@ def ws_open():
     运行WebSocket框架的事件循环 
     长连接
     不带ping和pong 
-    不填写ping的话，Python3中使用会报错，具体原因不明
     '''
-    ws.run_forever(ping_interval=0, ping_timeout=1)
+    ws.run_forever()
     pass
 
 
