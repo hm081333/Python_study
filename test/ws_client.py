@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 # Encoding: UTF-8
-import threading
-import time
-import sys
+import argparse
 import os
 import signal
+import sys
+import threading
+import time
+
 from module.module import *
 
 try:
@@ -45,6 +47,10 @@ except ImportError:
 
     pass
 
+# 程序当前版本
+version = "1.0.0"
+# 当前版本 构建日期
+build_date = "20180922"
 # 实例化json类
 json = Json()
 # 全局配置信息 默认空
@@ -289,16 +295,8 @@ def ws_open():
         on_close=on_close
     )
     '''
-    运行WebSocket框架的事件循环
-    长连接
-    里面有ping和pong
-    发送ping会开启一条线程...
-    '''
-    # ws.run_forever(ping_interval=10, ping_timeout=5)
-    '''
     运行WebSocket框架的事件循环 
     长连接
-    不带ping和pong 
     '''
     ws.run_forever()
     pass
@@ -325,17 +323,20 @@ def ws_reopen():
 def config_init(need_get_config=True):
     # 根据系统类型调取配置文件
     def get():
+        # 没有配置文件路径
         global config_path
-        # win32系统 = windows
-        if sys.platform == 'win32':
-            # 文件当前路径
-            current_path = os.path.dirname(os.path.realpath(__file__))
-            # windows下配置文件存放在同一目录
-            config_path = current_path + os.path.sep + "config.json"
-            pass
-        else:
-            # Linux上配置文件规定存放在/etc/miner
-            config_path = "/etc/miner/config.json"
+        if not config_path:
+            # win32系统 = windows
+            if sys.platform == 'win32':
+                # 文件当前路径
+                current_path = os.path.dirname(os.path.realpath(__file__))
+                # windows下配置文件存放在同一目录
+                config_path = current_path + os.path.sep + "config.json"
+                pass
+            else:
+                # Linux上配置文件规定存放在/etc/miner
+                config_path = "/etc/miner/config.json"
+                pass
             pass
         # 读取文件获取配置信息
         get_config()
@@ -431,20 +432,92 @@ def config_init(need_get_config=True):
     pass
 
 
+# 构建传入参数解析
+def parse_args():
+    # 创建一个解析对象
+    parser = argparse.ArgumentParser(
+        # 程序名
+        prog="Miner",
+        # help时显示的开始文字
+        description="A unified platform for miners.",
+        # help时显示的结尾文字
+        epilog="If you have more questions, please contact the developer.",
+        # 是否增加-h/--help选项
+        add_help=True,
+    )
+    # 向该对象中添加你要关注的命令行参数和选项
+    parser.add_argument(
+        # 必选，指定参数的形式，一般写两个，一个短参数，一个长参数
+        # 不写横杠就是argv形式
+        "-u",
+        "--url",
+        # 指定这个参数后面的value有多少个
+        # +表示至少一个 ?表示一个或0个 *表示0个或多个
+        # nargs='?',
+        # 如果命令行没有出现这个选项，那么使用default指定的默认值
+        # default=0,
+        # 如果希望传进来的参数是指定的类型（例如 float, int or file等可以从字符串转化过来的类型），可以使用
+        # type=int,
+        # 设置参数值的范围，如果choices中的类型不是字符串，记得指定type哦
+        # choices=['a', 'b', 'd'],
+        # 通常选项是可选的，但是如果required=True那么就是必须的了
+        # required=True,
+        # 参数的名字，在显示 帮助信息时才用到
+        # metavar="ws_url",
+        # 设置这个选项的值就是解析出来后放到哪个属性中
+        # dest="host",
+        # 操作类型，常量 无需填入参数，默认为false，使用参数时为true
+        # action="store_true",
+        # 设置这个选项的帮助信息
+        help="websocket url. ex. ws://127.0.0.1:7272/"
+    )
+    parser.add_argument(
+        "-config",
+        help="Config file for Miner."
+    )
+    parser.add_argument(
+        "-v",
+        "--version",
+        # 操作类型，版本号，打印后会自动退出程序
+        action="version",
+        # 打印的信息
+        version="%(prog)s" + "\t" + "v" + version + "\tBuilt\ton\t" + build_date,
+        help="Show current version of Miner."
+    )
+
+    # 返回解析参数
+    return parser.parse_args()
+
+
 # 主线程开始
 if __name__ == "__main__":
+    # 获取传入参数
+    args = parse_args()
+
+    # 判断 是否自定义配置文件路径
+    if args.config:
+        config_path = args.config
+        # 文件不存在 或 不可读
+        if not os.access(config_path, os.F_OK) or not os.access(config_path, os.R_OK):
+            print("config file is not exist or not readable")
+            # 终止运行程序
+            sys.exit(2)
+            pass
+        pass
+
     # 调取配置文件 设置配置参数
     config_init()
+
+    # 判断 是否自定义地址
+    if args.url:
+        host = args.url
+        pass
 
     if debug:
         # 把目前正在运行的线程赋值给线程列表
         thread_list = threading.enumerate()
         thread_state_list = []
         pass
-
-    # 判断 是否存在第二参数
-    if len(sys.argv) >= 2:
-        host = sys.argv[1]
 
     # 使用信号处理模块 停止运行
     # 终端输入了中断字符ctrl+c
