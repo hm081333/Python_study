@@ -77,12 +77,16 @@ log_obj = ''
 log_path = ""
 # 是否需要停止运行
 need_stop = False
+# 线程列表
+thread_list = []
+# 线程状态列表
+thread_state_list = []
 
 
 def print_thread():
     # 打印线程信息
     # 全局变量 线程列表
-    global thread_list
+    global thread_list, thread_state_list
     # 循环线程列表
     for index, thread in enumerate(thread_list):
         # noinspection PyBroadException
@@ -110,6 +114,9 @@ def print_thread():
 # 注册一个进程信号监听事件
 def stop_signal_handler(signal_id, frame):
     print("Signal code", signal_id)
+    if debug:
+        print(frame)
+        pass
     global need_stop
     need_stop = True
     # print('You pressed Ctrl+C!')
@@ -211,8 +218,8 @@ def on_open(ws):
             thread_list.append(send_thread)
             pass
         send_thread.start()
-    except Exception as e:
-        print(e)
+    except Exception as te:
+        print(te)
         pass
     pass
 
@@ -220,11 +227,13 @@ def on_open(ws):
 # 签名方法
 # 目前是对应DS中functions里面的securityPwd方法
 # SECURITY_KEY是DS中的常量，必须与系统中一致
-def sign():
+def sign(sign_str=mac):
     global SECURITY_KEY, PRIVATE_KEY
-    md5_obj = hashlib.md5(mac.encode("utf8"))
-    mac_md5 = md5_obj.hexdigest()
-    md5_obj = hashlib.md5(mac_md5.encode("utf8"))
+    # 先 加密待加密字符串
+    md5_obj = hashlib.md5(sign_str.encode("utf8"))
+    sign_str_md5 = md5_obj.hexdigest()
+    # 拼接 盐 和 密钥 加密
+    md5_obj = hashlib.md5(sign_str_md5.encode("utf8"))
     md5_obj.update(PRIVATE_KEY.encode("utf8"))
     md5_obj.update(SECURITY_KEY.encode("utf8"))
     return md5_obj.hexdigest()
@@ -258,9 +267,9 @@ def run(*args):
             try:
                 # 往服务端发送信息
                 ws.send(json_data)
-            except Exception as e:
+            except Exception as re:
                 # 打印发送失败消息
-                print(e)
+                print(re)
                 # 退出死循环
                 break
             pass
@@ -282,9 +291,9 @@ def ws_open():
         # WebSocket地址
         host,
         # 追加header
-        header=["x-token:ajKfZgQAf6vIddwC",
-                "x-tenant:T001124",
-                "x-server:1026"],
+        # header=["x-token:ajKfZgQAf6vIddwC",
+        #         "x-tenant:T001124",
+        #         "x-server:1026"],
         # 打开WebSocket后的回调def
         on_open=on_open,
         # 收到消息时回调
@@ -298,7 +307,12 @@ def ws_open():
     运行WebSocket框架的事件循环 
     长连接
     '''
-    ws.run_forever()
+    try:
+        ws.run_forever()
+        pass
+    except Exception as wre:
+        print(wre)
+        pass
     pass
 
 
@@ -312,9 +326,9 @@ def ws_reopen():
         # 重新连接WebSocket
         ws_open()
         pass
-    except Exception as e:
+    except Exception as oe:
         # 连接失败，打印失败信息
-        print(e)
+        print(oe)
         pass
     pass
 
@@ -481,7 +495,7 @@ def parse_args():
         # 操作类型，版本号，打印后会自动退出程序
         action="version",
         # 打印的信息
-        version="%(prog)s" + "\t" + "v" + version + "\tBuilt\ton\t" + build_date,
+        version="%(prog)s" + "\tv" + version + "\tBuilt\ton\t" + build_date,
         help="Show current version of Miner."
     )
 
@@ -489,13 +503,12 @@ def parse_args():
     return parser.parse_args()
 
 
-# 主线程开始
-if __name__ == "__main__":
+def main():
     # 获取传入参数
     args = parse_args()
-
     # 判断 是否自定义配置文件路径
     if args.config:
+        global config_path
         config_path = args.config
         # 文件不存在 或 不可读
         if not os.access(config_path, os.F_OK) or not os.access(config_path, os.R_OK):
@@ -510,10 +523,12 @@ if __name__ == "__main__":
 
     # 判断 是否自定义地址
     if args.url:
+        global host
         host = args.url
         pass
 
     if debug:
+        global thread_list, thread_state_list
         # 把目前正在运行的线程赋值给线程列表
         thread_list = threading.enumerate()
         thread_state_list = []
@@ -526,4 +541,15 @@ if __name__ == "__main__":
     signal.signal(signal.SIGTERM, stop_signal_handler)
     # 尝试连接WebSocket
     ws_open()
+
+    pass
+
+
+# 主线程开始
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception as e:
+        print(e)
+
     pass
