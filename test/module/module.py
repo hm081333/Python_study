@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # Encoding: UTF-8
 
+
 class GetMac(object):
     mac = ""
 
@@ -94,7 +95,7 @@ class Logger(object):
         'crit': logging.CRITICAL
     }  # 日志级别关系映射
 
-    def __init__(self, filename, level='info', when='D', backCount=3, fmt='%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s', debug=False):
+    def __init__(self, filename, level='info', when='D', backCount=3, fmt='%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s'):
         self.logger = self.logging.getLogger(filename)
         format_str = self.logging.Formatter(fmt)  # 设置日志格式
         # format_str = self.logging.Formatter(fmt, '%Y-%m-%d %H:%M:%S')  # 设置日志格式
