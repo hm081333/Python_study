@@ -72,7 +72,7 @@ mac = GetMac(upper=True, colon=True).mac
 # 配置文件存放路径
 config_path = ""
 # 初始化日志写入 对象
-log_obj = ''
+# log_obj = {}
 # 日志文件存放路径
 log_path = ""
 # 是否需要停止运行
@@ -100,38 +100,36 @@ def print_thread():
             pass
         pass
     # 打印线程列表
-    websocket.dump("thread list", thread_list)
-    # print(thread_list)
+    log_obj.dump("debug", "thread list", thread_list)
     # 打印线程状态列表
-    websocket.dump("thread state list", thread_state_list)
-    # print(thread_state_list)
+    log_obj.dump("debug", "thread state list", thread_state_list)
     # 打印运行中线程数量
-    websocket.dump("thread count", threading.activeCount())
-    # print("Number of threads:", threading.activeCount())
+    log_obj.dump("debug", "thread count", threading.activeCount())
     pass
 
 
 # 注册一个进程信号监听事件
 def stop_signal_handler(signal_id, frame):
-    print("Signal code", signal_id)
     if debug:
-        print(frame)
+        log_obj.debug("Signal code " + signal_id)
+        log_obj.debug(frame)
         pass
+
     global need_stop
     need_stop = True
     # print('You pressed Ctrl+C!')
-    print('Exiting...')
+    log_obj.info("Exiting...")
     pass
 
 
 # 当服务端发来消息时触发
 def on_message(ws, message):
     def init():
-        print("### Connect successfully ###")
+        log_obj.info("### Connect successfully ###")
         pass
 
     def ping():
-        print("### Receive Ping successfully ###")
+        log_obj.info("### Receive Ping successfully ###")
         pass
 
     def set_config():
@@ -142,15 +140,15 @@ def on_message(ws, message):
             json.file_dump(config_path, config)
             config_init(False)
             ws.close()
-            print("### Set Config successfully ###")
+            log_obj.info("### Set Config successfully ###")
             pass
         except Exception:
-            print("### Set Config failure ###")
+            log_obj.error("### Set Config failure ###")
             pass
         pass
 
     def send():
-        print("### Send successfully ###")
+        log_obj.info("### Send successfully ###")
         pass
 
     # try except 判断返回是否json传
@@ -173,7 +171,7 @@ def on_message(ws, message):
         pass
     except Exception:
         # 不是JSON串，直接打印
-        print(message)
+        log_obj.error(message)
         pass
     pass
 
@@ -181,19 +179,17 @@ def on_message(ws, message):
 # 当发生错误时触发
 def on_error(ws, error):
     ws.close()
-    print(error)
+    log_obj.error(error)
     if debug:
-        websocket.dump("threads", threading.enumerate())
-        websocket.dump("thread count", threading.activeCount())
-        # print(threading.enumerate())
-        # print(threading.activeCount())
+        log_obj.dump("debug", "threads", threading.enumerate())
+        log_obj.dump("debug", "thread count", threading.activeCount())
         pass
     pass
 
 
 # 当断开连接时触发
 def on_close(ws):
-    print("### Connection Closed ###")
+    log_obj.info("### Connection Closed ###")
     ws.close()
     if not need_stop:
         # 重新打开WebSocket连接
@@ -212,14 +208,13 @@ def on_open(ws):
         send_thread.setDaemon(True)
         if debug:
             global thread_list
-            websocket.dump("thread list", thread_list)
-            # print(thread_list)
+            log_obj.dump("debug", "thread list", thread_list)
             # 新建线程追加到线程列表
             thread_list.append(send_thread)
             pass
         send_thread.start()
     except Exception as te:
-        print(te)
+        log_obj.error(te)
         pass
     pass
 
@@ -241,7 +236,6 @@ def sign(sign_str=mac):
 
 # 线程运行方法
 def run(*args):
-    # print(args)
     ws = args[0]
     # 要发送的信息列表
     data = {
@@ -259,7 +253,7 @@ def run(*args):
         time.sleep(send_interval)
         # 将要关闭
         if need_stop:
-            print('Exiting......')
+            log_obj.info("Exiting......")
             # 直接退出循环
             break
             pass
@@ -269,14 +263,14 @@ def run(*args):
                 ws.send(json_data)
             except Exception as re:
                 # 打印发送失败消息
-                print(re)
+                log_obj.error(re)
                 # 退出死循环
                 break
             pass
         pass
     pass
     # 退出死循环，打印
-    print("### exit while ###")
+    log_obj.info("### exit while ###")
     # 主动断开WebSocket连接
     ws.close()
     pass
@@ -311,7 +305,7 @@ def ws_open():
         ws.run_forever()
         pass
     except Exception as wre:
-        print(wre)
+        log_obj.error(wre)
         pass
     pass
 
@@ -319,7 +313,7 @@ def ws_open():
 # 重新打开WebSocket连接
 def ws_reopen():
     # 打印，证明进入重新连接
-    print("### Waiting for %d seconds to reconnect ###" % reconnect_wait)
+    log_obj.info("### Waiting for %d seconds to reconnect ###" % reconnect_wait)
     # 重新连接等待时间
     time.sleep(reconnect_wait)
     try:
@@ -328,7 +322,7 @@ def ws_reopen():
         pass
     except Exception as oe:
         # 连接失败，打印失败信息
-        print(oe)
+        log_obj.error(oe)
         pass
     pass
 
@@ -365,11 +359,11 @@ def config_init(need_get_config=True):
         # os.X_OK: 检查文件是否可以执行
         # 文件不存在
         if not os.access(config_path, os.F_OK):
-            print("config file not exist")
+            log_obj.error("config file not exist")
             return
         # 文件不可读
         if not os.access(config_path, os.R_OK):
-            print("config file not readable")
+            log_obj.error("config file not readable")
             return
         global config
         config = json.file_load(config_path)
@@ -382,43 +376,43 @@ def config_init(need_get_config=True):
         def set_debug():
             global debug
             debug = config["debug"]
-            print("### Set Debug successfully ###")
+            log_obj.info("### Set Debug successfully ###")
             pass
 
         def set_host():
             global host
             host = config["host"]
-            print("### Set Host successfully ###")
+            log_obj.info("### Set Host successfully ###")
             pass
 
         def set_reconnect_wait():
             global reconnect_wait
             reconnect_wait = config["reconnectWait"]
-            print("### Set Reconnect Wait successfully ###")
+            log_obj.info("### Set Reconnect Wait successfully ###")
             pass
 
         def set_send_interval():
             global send_interval
             send_interval = config["sendInterval"]
-            print("### Set Send Interval successfully ###")
+            log_obj.info("### Set Send Interval successfully ###")
             pass
 
         def set_security_key():
             global SECURITY_KEY
             SECURITY_KEY = config["securityKey"]
-            print("### Set SECURITY KEY successfully ###")
+            log_obj.info("### Set SECURITY KEY successfully ###")
             pass
 
         def set_private_key():
             global PRIVATE_KEY
             PRIVATE_KEY = config["privateKey"]
-            print("### Set PRIVATE KEY successfully ###")
+            log_obj.info("### Set PRIVATE KEY successfully ###")
             pass
 
         def set_log_path():
             global log_path
             log_path = config["logPath"]
-            print("### Set Log Path successfully ###")
+            log_obj.info("### Set Log Path successfully ###")
             pass
 
         # 构造字典 等同switch case
@@ -491,6 +485,7 @@ def parse_args():
     )
     parser.add_argument(
         "-v",
+        "-version",
         "--version",
         # 操作类型，版本号，打印后会自动退出程序
         action="version",
@@ -504,6 +499,9 @@ def parse_args():
 
 
 def main():
+    # 初始化日志方法 生成日志对象
+    global log_obj
+    log_obj = logger()
     # 获取传入参数
     args = parse_args()
     # 判断 是否自定义配置文件路径
@@ -512,7 +510,7 @@ def main():
         config_path = args.config
         # 文件不存在 或 不可读
         if not os.access(config_path, os.F_OK) or not os.access(config_path, os.R_OK):
-            print("config file is not exist or not readable")
+            log_obj.error("config file is not exist or not readable")
             # 终止运行程序
             sys.exit(2)
             pass
@@ -534,22 +532,44 @@ def main():
         thread_state_list = []
         pass
 
-    # 使用信号处理模块 停止运行
-    # 终端输入了中断字符ctrl+c
-    signal.signal(signal.SIGINT, stop_signal_handler)
-    # 有kill函数调用产生
-    signal.signal(signal.SIGTERM, stop_signal_handler)
     # 尝试连接WebSocket
     ws_open()
 
     pass
 
 
+# 构造日志方法
+def logger():
+    # win32系统 = windows
+    if sys.platform == 'win32':
+        # 文件当前路径
+        current_path = os.path.dirname(os.path.realpath(__file__))
+        # windows下配置文件存放在同一目录
+        logger_path = current_path + os.path.sep + "miner.log"
+        pass
+    else:
+        # Linux上日志文件规定存放在/var/log/miner
+        logger_path = "/var/log/miner/miner.log"
+        pass
+    # fmt = '%(asctime)s - %(module)s[line:%(lineno)d] - %(levelname)s: %(message)s'
+    fmt = '%(asctime)s|%(levelname)s|%(module)s|%(lineno)d|%(message)s'
+    return Logger(logger_path, level='debug', fmt=fmt).logger
+    # return Logger(logger_path, level='debug', fmt=fmt)
+
+
 # 主线程开始
 if __name__ == "__main__":
+    # 使用信号处理模块 停止运行
+    # 终端输入了中断字符ctrl+c
+    signal.signal(signal.SIGINT, stop_signal_handler)
+    # 有kill函数调用产生
+    signal.signal(signal.SIGTERM, stop_signal_handler)
+
     try:
         main()
+        pass
     except Exception as e:
-        print(e)
+        log_obj.error(e)
+        pass
 
     pass
