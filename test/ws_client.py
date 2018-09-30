@@ -48,9 +48,9 @@ except ImportError:
     pass
 
 # 程序当前版本
-version = "1.0.0"
+version = "1.0.1"
 # 当前版本 构建日期
-build_date = "20180922"
+build_date = "20180928"
 # 实例化json类
 json = Json()
 # 全局配置信息 默认空
@@ -181,8 +181,8 @@ def on_error(ws, error):
     ws.close()
     log_obj.error(error)
     if debug:
-        log_obj.dump("debug", "threads", threading.enumerate())
-        log_obj.dump("debug", "thread count", threading.activeCount())
+        log_obj.dump("debug", "current threads", threading.enumerate())
+        log_obj.dump("debug", "current thread count", threading.activeCount())
         pass
     pass
 
