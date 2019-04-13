@@ -136,7 +136,10 @@ def on_message(ws, message):
         global config
         # noinspection PyBroadException
         try:
-            config = json.load(message["data"])
+            # 服务器下发配置
+            new_config = message["data"]
+            # 合并配置
+            config.update(new_config)
             json.file_dump(config_path, config)
             config_init(False)
             ws.close()
@@ -151,6 +154,10 @@ def on_message(ws, message):
         log_obj.info("### Send successfully ###")
         pass
 
+    def upgrade():
+        log_obj.info("### Upgrade successfully ###")
+        pass
+
     # try except 判断返回是否json传
     # noinspection PyBroadException
     try:
@@ -162,6 +169,7 @@ def on_message(ws, message):
             "ping": ping,
             "send": send,
             "config": set_config,
+            "upgrade": upgrade,
         }
 
         # 在字典中获取对应的方法名
