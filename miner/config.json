@@ -1,0 +1,8 @@
+{
+  "debug": false,
+  "host": "ws://127.0.0.1:7272",
+  "reconnectWait": 5,
+  "sendInterval": 5,
+  "securityKey": "4329098asdkae",
+  "privateKey": "12345asd"
+}
