@@ -16,51 +16,51 @@ str = 'abcdef123456'
 print(str[2:4])
 
 x = range(5)
-print x
-print len(x)  # 返回： 序列中包含元素的个数
-print min(x)  # 返回： 序列中最小的元素
-print max(x)  # 返回： 序列中最大的元素
-print all(x)  # 返回： True, 如果所有元素都为True的话
-print any(x)  # 返回： True, 如果任一元素为True的话
+print(x)
+print(len(x))  # 返回： 序列中包含元素的个数
+print(min(x))  # 返回： 序列中最小的元素
+print(max(x))  # 返回： 序列中最大的元素
+print(all(x))  # 返回： True, 如果所有元素都为True的话
+print(any(x))  # 返回： True, 如果任一元素为True的话
 # 下面的方法主要起查询功能，不改变序列本身, 可用于表和定值表:
-print sum(x)  # 返回： 序列中所有元素的和
+print(sum(x))  # 返回： 序列中所有元素的和
 # x为元素值，i为下标(元素在序列中的位置)
-print x.count(0)  # 返回： x在s中出现的次数
-print x.index(3)  # 返回： x在s中第一次出现的下标
+print(x.count(0))  # 返回： x在s中出现的次数
+print(x.index(3))  # 返回： x在s中第一次出现的下标
 # 由于定值表的元素不可变更，下面方法只适用于表:
 l = s3
 l2 = s2
 l.extend(l2)  # 在表l的末尾添加表l2的所有元素
-print l
+print(l)
 l.append(x)  # 在l的末尾附加x元素
-print l
+print(l)
 l.sort()  # 对l中的元素排序
-print l
+print(l)
 l.reverse()  # 将l中的元素逆序
-print l
+print(l)
 l.pop()  # 返回：表l的最后一个元素，并在表l中删除该元素
-print l
+print(l)
 del l[0]  # 删除0下标该元素
-print l
+print(l)
 # (以上这些方法都是在原来的表的上进行操作，会对原来的表产生影响，而不是返回一个新表。)
 
 # str为一个字符串，sub为str的一个子字符串。s为一个序列，它的元素都是字符串。width为一个整数，用于说明新生成字符串的宽度。
 sub = '123456'
 s = ['a', 'b', 'c']
-print str.count(sub)  # 返回：sub在str中出现的次数
-print str.find(sub)  # 返回：从左开始，查找sub在str中第一次出现的位置。如果str中不包含sub，返回 -1
-print str.index(sub)  # 返回：从左开始，查找sub在str中第一次出现的位置。如果str中不包含sub，举出错误
-print str.rfind(sub)  # 返回：从右开始，查找sub在str中第一次出现的位置。如果str中不包含sub，返回 -1
-print str.rindex(sub)  # 返回：从右开始，查找sub在str中第一次出现的位置。如果str中不包含sub，举出错误
+print(str.count(sub))  # 返回：sub在str中出现的次数
+print(str.find(sub))  # 返回：从左开始，查找sub在str中第一次出现的位置。如果str中不包含sub，返回 -1
+print(str.index(sub))  # 返回：从左开始，查找sub在str中第一次出现的位置。如果str中不包含sub，举出错误
+print(str.rfind(sub))  # 返回：从右开始，查找sub在str中第一次出现的位置。如果str中不包含sub，返回 -1
+print(str.rindex(sub))  # 返回：从右开始，查找sub在str中第一次出现的位置。如果str中不包含sub，举出错误
 
-print str.isalnum()  # 返回：True， 如果所有的字符都是字母或数字
-print str.isalpha()  # 返回：True，如果所有的字符都是字母
-print str.isdigit()  # 返回：True，如果所有的字符都是数字
-print str.istitle()  # 返回：True，如果所有的词的首字母都是大写
-print str.isspace()  # 返回：True，如果所有的字符都是空格
-print str.islower()  # 返回：True，如果所有的字符都是小写字母
-print str.isupper()  # 返回：True，如果所有的字符都是大写字母
-print '\n'
+print(str.isalnum())  # 返回：True， 如果所有的字符都是字母或数字
+print(str.isalpha())  # 返回：True，如果所有的字符都是字母
+print(str.isdigit())  # 返回：True，如果所有的字符都是数字
+print(str.istitle())  # 返回：True，如果所有的词的首字母都是大写
+print(str.isspace())  # 返回：True，如果所有的字符都是空格
+print(str.islower())  # 返回：True，如果所有的字符都是小写字母
+print(str.isupper())  # 返回：True，如果所有的字符都是大写字母
+print('\n')
 
 # 返回：从左开始，以空格为分割符(separator)，将str分割为多个子字符串，总共分割max次。将所得的子字符串放在一个表中返回。可以str.split(',')的方式使用逗号或者其它分割符
 # str.split([sep, [max]])
