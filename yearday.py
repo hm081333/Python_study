@@ -3,29 +3,31 @@ def year():
     a = y % 400
     b = y % 4
     if not a:
-        print ("%d is  leap year" % y)
+        print("%d is  leap year" % y)
     elif b:
-        print ("%d is not leap year" % y)
+        print("%d is not leap year" % y)
     else:
-        print ("%d is leap year" % y)
+        print("%d is leap year" % y)
 
 
 def day():
-    day = raw_input("please input date(like:'20080101'):")
+    day = input("please input date(like:'20080101'):")
     days = 0
     m2 = [2, 4, 6, 9, 11]
     y = int(day[:4])
     m = int(day[4:6])
     d = int(day[6:])
     if (y != 2008):
-        print 'The year must be 2008'
+        print('The year must be 2008')
     for i in range(1, m):
         days += 31
         if (i in m2):
             days -= 1
     else:
         days += d
-        print ("%s is the first %d days of %d" % (day, days, y))
+        print("%s is the first %d days of %d" % (day, days, y))
+
+
 ###################################################################
 
 
@@ -65,12 +67,12 @@ def record():
             j.append(0)
         O += int(eachLine[-3:])
     fp.close()
-    print "Score below 60 who have: %s" % F
-    print "Names beginning with 'L' to include: %s" % L
-    print "The total score for all: %d" % O
+    print("Score below 60 who have: %s" % F)
+    print("Names beginning with 'L' to include: %s" % L)
+    print("The total score for all: %d" % O)
     if flag:
         modify(j)
-        print "Not capitalized initials: %s, already edited." % N
+        print("Not capitalized initials: %s, already edited." % N)
 
 
 if __name__ == '__main__':
