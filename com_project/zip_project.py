@@ -164,7 +164,7 @@ if __name__ == "__main__":
 
     try:
         # 备份数据库
-        backup_database()
+        # backup_database()
         # 执行压缩方法
         print("正在打包压缩代码文件")
         Zip(

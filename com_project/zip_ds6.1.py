@@ -24,7 +24,7 @@ if __name__ == '__main__':
     if not result['err']:
 
         # 本次更新版本号
-        new_version = result['msg'].split(' ')[-1].strip().strip('.')
+        new_version = result['res'].split(' ')[-1].strip().strip('.')
         print("版本号：" + new_version)
         # 上次更新版本号
         old_version = 0

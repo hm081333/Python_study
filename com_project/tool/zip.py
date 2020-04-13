@@ -60,7 +60,8 @@ class Zip(object):
         for path, dirnames, filenames in self.os.walk(zip_path):
             # 去掉多余路径
             fpath = path.replace(del_path, '')
-
+            # print(ignore_path)
+            # print(set(fpath.split(self.os.sep)))
             # 含有忽略目录数量 - 是否忽略该路径
             if len(list(set(ignore_path).intersection(set(fpath.split(self.os.sep))))):
                 continue
