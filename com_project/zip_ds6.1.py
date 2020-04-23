@@ -41,7 +41,8 @@ if __name__ == '__main__':
             # print(e)
             pass
         pass
-        if new_version == old_version and False:
+
+        if new_version == old_version:
             print("无需重新打包")
             exit_program(0)
             pass
